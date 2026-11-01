@@ -1,1 +1,146 @@
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07111f">
+  <title>FF CUP 2026 — Registration</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 28px 16px;
+      display: grid; place-items: center;
+      background: radial-gradient(circle at top, #12334c 0, #07111f 55%);
+      color: #f4f8ff; font-family: Arial, sans-serif;
+    }
+    .wrap { width: 100%; max-width: 460px; }
+    .brand { text-align: center; margin-bottom: 18px; }
+    .brand small { color: #7edfff; letter-spacing: 4px; font-weight: 700; }
+    h1 { margin: 8px 0; color: #36d5ff; font-size: clamp(30px, 8vw, 42px); }
+    .tagline { color: #a9c0d5; margin: 0; }
+    .panel {
+      padding: 25px; background: rgba(16,31,50,.96);
+      border: 1px solid #23617e; border-radius: 20px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.35);
+    }
+    h2 { margin: 0 0 8px; font-size: 21px; }
+    .hint { color: #a9c0d5; line-height: 1.5; font-size: 14px; margin: 0 0 18px; }
+    label { display: block; margin: 15px 0 7px; color: #d9e8f5; font-size: 14px; }
+    input {
+      width: 100%; padding: 14px; border-radius: 10px;
+      background: #07111f; color: white; border: 1px solid #31506a;
+      font-size: 16px; outline: none;
+    }
+    input:focus { border-color: #36d5ff; box-shadow: 0 0 0 3px rgba(54,213,255,.12); }
+    button {
+      width: 100%; margin-top: 20px; padding: 15px;
+      border: 0; border-radius: 10px; background: #19bce9;
+      color: #06111d; font-size: 15px; font-weight: 800;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: wait; }
+    #message {
+      display: none; margin: 16px 0 0; padding: 12px;
+      border-radius: 10px; line-height: 1.45; font-size: 14px;
+    }
+    #message.show { display: block; }
+    #message.ok { color: #baf7d0; background: #123b2a; border: 1px solid #26734c; }
+    #message.err { color: #ffd0d0; background: #401d27; border: 1px solid #8a3948; }
+    .foot { text-align: center; color: #7892a9; font-size: 12px; margin: 16px 0 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="brand">
+      <small>GLOBAL SOLO SERIES</small>
+      <h1>FF CUP 2026</h1>
+      <p class="tagline">Твоя игра. Твой результат. Твоя история.</p>
+    </header>
+
+    <main class="panel">
+      <h2>Регистрация участника</h2>
+      <p class="hint">Заполни данные Free Fire. После отправки заявка получит статус «На проверке».</p>
+
+      <form id="registrationForm">
+        <label for="nickname">Игровой ник</label>
+        <input id="nickname" name="nickname" type="text" maxlength="32"
+               autocomplete="nickname" placeholder="Например: Player123" required>
+
+        <label for="uid">Free Fire UID</label>
+        <input id="uid" name="uid" type="text" inputmode="numeric" maxlength="24"
+               placeholder="Введи свой игровой UID" required>
+
+        <button id="submitButton" type="submit">ОТПРАВИТЬ ЗАЯВКУ</button>
+      </form>
+      <p id="message" role="status" aria-live="polite"></p>
+    </main>
+    <p class="foot">FF CUP 2026 • Официальная регистрационная страница</p>
+  </div>
+
+  <script>
+    // Publishable/anon key предназначен для клиентского использования.
+    // Никогда не вставляй сюда service_role или secret key.
+    const SUPABASE_URL = "https://rciwumuqhwpncviyojnj.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_t6mgrMh69tBD7dy021EnIA_SbWwJg6n";
+
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const form = document.getElementById("registrationForm");
+    const button = document.getElementById("submitButton");
+    const message = document.getElementById("message");
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = "show " + type;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const nickname = document.getElementById("nickname").value.trim();
+      const uid = document.getElementById("uid").value.trim();
+
+      if (nickname.length < 2 || nickname.length > 32) {
+        showMessage("Ник должен содержать от 2 до 32 символов.", "err");
+        return;
+      }
+
+      if (!/^[0-9]{5,24}$/.test(uid)) {
+        showMessage("Проверь UID: введи только цифры (от 5 до 24).", "err");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "ОТПРАВЛЯЕМ...";
+      message.className = "";
+
+      try {
+        const { error } = await client.from("players").insert({
+          nickname,
+          game_uid: uid,
+          status: "pending"
+        });
+
+        if (error) {
+          if (error.code === "23505") {
+            showMessage("Этот UID уже зарегистрирован. Если это ошибка, обратись в поддержку турнира.", "err");
+          } else {
+            console.error("Supabase registration error:", error);
+            showMessage("Не удалось отправить заявку. Попробуй позже или обратись в поддержку.", "err");
+          }
+          return;
+        }
+
+        form.reset();
+        showMessage("Заявка принята! Она ожидает проверки организатором.", "ok");
+      } catch (error) {
+        console.error("Unexpected registration error:", error);
+        showMessage("Нет соединения. Проверь интернет и попробуй ещё раз.", "err");
+      } finally {
+        button.disabled = false;
+        button.textContent = "ОТПРАВИТЬ ЗАЯВКУ";
+      }
+    });
+  </script>
+</body>
+</html>
