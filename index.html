@@ -2,145 +2,232 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07111f">
-  <title>FF CUP 2026 — Registration</title>
+  <title>FF CUP 2026 — Global Solo Series</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; padding: 28px 16px;
-      display: grid; place-items: center;
-      background: radial-gradient(circle at top, #12334c 0, #07111f 55%);
-      color: #f4f8ff; font-family: Arial, sans-serif;
-    }
-    .wrap { width: 100%; max-width: 460px; }
-    .brand { text-align: center; margin-bottom: 18px; }
-    .brand small { color: #7edfff; letter-spacing: 4px; font-weight: 700; }
-    h1 { margin: 8px 0; color: #36d5ff; font-size: clamp(30px, 8vw, 42px); }
-    .tagline { color: #a9c0d5; margin: 0; }
-    .panel {
-      padding: 25px; background: rgba(16,31,50,.96);
-      border: 1px solid #23617e; border-radius: 20px;
-      box-shadow: 0 18px 55px rgba(0,0,0,.35);
-    }
-    h2 { margin: 0 0 8px; font-size: 21px; }
-    .hint { color: #a9c0d5; line-height: 1.5; font-size: 14px; margin: 0 0 18px; }
-    label { display: block; margin: 15px 0 7px; color: #d9e8f5; font-size: 14px; }
-    input {
-      width: 100%; padding: 14px; border-radius: 10px;
-      background: #07111f; color: white; border: 1px solid #31506a;
-      font-size: 16px; outline: none;
-    }
-    input:focus { border-color: #36d5ff; box-shadow: 0 0 0 3px rgba(54,213,255,.12); }
-    button {
-      width: 100%; margin-top: 20px; padding: 15px;
-      border: 0; border-radius: 10px; background: #19bce9;
-      color: #06111d; font-size: 15px; font-weight: 800;
-      cursor: pointer;
-    }
-    button:disabled { opacity: .6; cursor: wait; }
-    #message {
-      display: none; margin: 16px 0 0; padding: 12px;
-      border-radius: 10px; line-height: 1.45; font-size: 14px;
-    }
-    #message.show { display: block; }
-    #message.ok { color: #baf7d0; background: #123b2a; border: 1px solid #26734c; }
-    #message.err { color: #ffd0d0; background: #401d27; border: 1px solid #8a3948; }
-    .foot { text-align: center; color: #7892a9; font-size: 12px; margin: 16px 0 0; }
+    :root{--bg:#07111f;--panel:#101f32;--line:#24445f;--cyan:#36d5ff;--muted:#a9c0d5;--white:#f4f8ff}
+    *{box-sizing:border-box}
+    body{margin:0;background:radial-gradient(circle at top,#12334c 0,var(--bg) 55%);color:var(--white);font-family:Arial,sans-serif;min-height:100vh}
+    header{padding:24px 16px 12px;text-align:center}
+    header small{color:var(--cyan);letter-spacing:4px;font-weight:bold}
+    h1{font-size:clamp(30px,8vw,46px);margin:9px 0;color:var(--cyan)}
+    header p{color:var(--muted);margin:0}
+    nav{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:14px}
+    nav button{width:auto;margin:0;padding:11px 15px}
+    main{width:min(100% - 28px,760px);margin:8px auto 40px}
+    .panel{background:rgba(16,31,50,.97);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:16px;box-shadow:0 15px 40px #0005}
+    h2{margin:0 0 10px}
+    p{line-height:1.55}
+    .muted{color:var(--muted)}
+    label{display:block;margin:15px 0 7px;font-size:14px}
+    input{width:100%;padding:14px;border-radius:10px;background:#07111f;color:white;border:1px solid #31506a;font-size:16px;outline:none}
+    input:focus{border-color:var(--cyan)}
+    button{border:0;border-radius:10px;background:var(--cyan);color:#06111d;font-weight:800;padding:14px 18px;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}
+    .primary{width:100%;margin-top:18px}
+    .tab{background:#19334b;color:var(--white);border:1px solid #31506a}
+    .tab.active{background:var(--cyan);color:#06111d}
+    .view{display:none}
+    .view.active{display:block}
+    .notice{display:none;padding:12px;border-radius:10px;margin-top:14px;font-size:14px}
+    .notice.show{display:block}
+    .ok{background:#123b2a;color:#baf7d0}
+    .err{background:#401d27;color:#ffd0d0}
+    .passport{border:1px solid #28718e;border-radius:14px;padding:18px;margin-top:16px;background:linear-gradient(135deg,#102b42,#091725)}
+    .passport strong{color:var(--cyan);font-size:22px;display:block;margin:8px 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .stat{padding:14px;border:1px solid var(--line);border-radius:12px}
+    .stat b{display:block;color:var(--cyan);font-size:20px;margin-bottom:5px}
+    footer{text-align:center;color:#7892a9;font-size:12px;padding:0 15px 24px}
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="brand">
-      <small>GLOBAL SOLO SERIES</small>
-      <h1>FF CUP 2026</h1>
-      <p class="tagline">Твоя игра. Твой результат. Твоя история.</p>
-    </header>
+<header>
+  <small>GLOBAL SOLO SERIES</small>
+  <h1>FF CUP 2026</h1>
+  <p>Твоя игра. Твой результат. Твоя история.</p>
+</header>
 
-    <main class="panel">
+<nav>
+  <button class="tab active" data-view="home">Главная</button>
+  <button class="tab" data-view="register">Регистрация</button>
+  <button class="tab" data-view="passport">FF ID Passport</button>
+  <button class="tab" data-view="tournament">Турнир</button>
+</nav>
+
+<main>
+  <section id="home" class="view active">
+    <div class="panel">
+      <h2>Добро пожаловать в FF CUP 2026</h2>
+      <p class="muted">Международная серия SOLO-турниров Free Fire. Регистрируйся, получай постоянный номер игрока и следи за новостями соревнований.</p>
+      <div class="grid">
+        <div class="stat"><b>SOLO</b><span class="muted">Формат турнира</span></div>
+        <div class="stat"><b>FF ID</b><span class="muted">Постоянный номер игрока</span></div>
+        <div class="stat"><b>GLOBAL</b><span class="muted">Международный проект</span></div>
+      </div>
+      <button class="primary" onclick="showView('register')">Зарегистрироваться</button>
+    </div>
+  </section>
+
+  <section id="register" class="view">
+    <div class="panel">
       <h2>Регистрация участника</h2>
-      <p class="hint">Заполни данные Free Fire. После отправки заявка получит статус «На проверке».</p>
-
+      <p class="muted">Укажи игровой ник и UID. Заявка будет отправлена на проверку организатору.</p>
       <form id="registrationForm">
         <label for="nickname">Игровой ник</label>
-        <input id="nickname" name="nickname" type="text" maxlength="32"
-               autocomplete="nickname" placeholder="Например: Player123" required>
-
+        <input id="nickname" maxlength="32" autocomplete="nickname" required placeholder="Твой ник в Free Fire">
         <label for="uid">Free Fire UID</label>
-        <input id="uid" name="uid" type="text" inputmode="numeric" maxlength="24"
-               placeholder="Введи свой игровой UID" required>
-
-        <button id="submitButton" type="submit">ОТПРАВИТЬ ЗАЯВКУ</button>
+        <input id="uid" inputmode="numeric" maxlength="24" required placeholder="Твой игровой UID">
+        <button class="primary" id="submitButton" type="submit">ОТПРАВИТЬ ЗАЯВКУ</button>
       </form>
-      <p id="message" role="status" aria-live="polite"></p>
-    </main>
-    <p class="foot">FF CUP 2026 • Официальная регистрационная страница</p>
-  </div>
+      <div id="registerMessage" class="notice" role="status"></div>
+    </div>
+  </section>
 
-  <script>
-    // Publishable/anon key предназначен для клиентского использования.
-    // Никогда не вставляй сюда service_role или secret key.
-    const SUPABASE_URL = "https://rciwumuqhwpncviyojnj.supabase.co";
-    const SUPABASE_KEY = "sb_publishable_t6mgrMh69tBD7dy021EnIA_SbWwJg6n";
+  <section id="passport" class="view">
+    <div class="panel">
+      <h2>Проверка FF ID Passport</h2>
+      <p class="muted">Введи номер паспорта, чтобы проверить его наличие в базе FF CUP.</p>
+      <form id="passportForm">
+        <label for="passportId">Номер паспорта</label>
+        <input id="passportId" maxlength="32" required placeholder="FF-2026-000001">
+        <button class="primary" id="passportButton" type="submit">ПРОВЕРИТЬ ПАСПОРТ</button>
+      </form>
+      <div id="passportMessage" class="notice" role="status"></div>
+      <div id="passportResult"></div>
+    </div>
+  </section>
 
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    const form = document.getElementById("registrationForm");
-    const button = document.getElementById("submitButton");
-    const message = document.getElementById("message");
+  <section id="tournament" class="view">
+    <div class="panel">
+      <h2>Первый турнир FF CUP 2026</h2>
+      <div class="grid">
+        <div class="stat"><b>21.02.2027</b><span class="muted">Планируемая дата</span></div>
+        <div class="stat"><b>20</b><span class="muted">Планируемое число игроков</span></div>
+        <div class="stat"><b>SOLO</b><span class="muted">Формат</span></div>
+      </div>
+      <p class="muted">Дата, правила, регистрационные сроки и список игровых наград будут опубликованы после окончательного подтверждения организатором.</p>
+    </div>
+  </section>
+</main>
 
-    function showMessage(text, type) {
-      message.textContent = text;
-      message.className = "show " + type;
-    }
+<footer>FF CUP 2026 • Официальная страница проекта</footer>
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+<script>
+  const SUPABASE_URL = "https://rciwumuqhwpncviyojnj.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_t6mgrMh69tBD7dy021EnIA_SbWwJg6n";
+  const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      const nickname = document.getElementById("nickname").value.trim();
-      const uid = document.getElementById("uid").value.trim();
+  function showView(id) {
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
+    document.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b.dataset.view === id));
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
 
-      if (nickname.length < 2 || nickname.length > 32) {
-        showMessage("Ник должен содержать от 2 до 32 символов.", "err");
-        return;
-      }
+  document.querySelectorAll(".tab").forEach(b =>
+    b.addEventListener("click", () => showView(b.dataset.view))
+  );
 
-      if (!/^[0-9]{5,24}$/.test(uid)) {
-        showMessage("Проверь UID: введи только цифры (от 5 до 24).", "err");
-        return;
-      }
+  function notice(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = "notice show " + type;
+  }
 
-      button.disabled = true;
-      button.textContent = "ОТПРАВЛЯЕМ...";
-      message.className = "";
+  document.getElementById("registrationForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const nickname = document.getElementById("nickname").value.trim();
+    const uid = document.getElementById("uid").value.trim();
+    const btn = document.getElementById("submitButton");
 
-      try {
-        const { error } = await client.from("players").insert({
-          nickname,
-          game_uid: uid,
-          status: "pending"
-        });
+    if (nickname.length < 2 || nickname.length > 32)
+      return notice("registerMessage","Ник должен содержать от 2 до 32 символов.","err");
 
-        if (error) {
-          if (error.code === "23505") {
-            showMessage("Этот UID уже зарегистрирован. Если это ошибка, обратись в поддержку турнира.", "err");
-          } else {
-            console.error("Supabase registration error:", error);
-            showMessage("Не удалось отправить заявку. Попробуй позже или обратись в поддержку.", "err");
-          }
-          return;
+    if (!/^[0-9]{5,24}$/.test(uid))
+      return notice("registerMessage","UID должен содержать только цифры (5–24).","err");
+
+    btn.disabled = true;
+    btn.textContent = "ОТПРАВЛЯЕМ...";
+
+    try {
+      const {error} = await db.from("players").insert({
+        nickname,
+        game_uid: uid,
+        status: "pending"
+      });
+
+      if (error) {
+        if (error.code === "23505")
+          notice("registerMessage","Этот UID уже зарегистрирован.","err");
+        else {
+          console.error(error);
+          notice("registerMessage","Не удалось отправить заявку. Попробуй позже.","err");
         }
-
-        form.reset();
-        showMessage("Заявка принята! Она ожидает проверки организатором.", "ok");
-      } catch (error) {
-        console.error("Unexpected registration error:", error);
-        showMessage("Нет соединения. Проверь интернет и попробуй ещё раз.", "err");
-      } finally {
-        button.disabled = false;
-        button.textContent = "ОТПРАВИТЬ ЗАЯВКУ";
+      } else {
+        e.target.reset();
+        notice("registerMessage","Заявка отправлена и ожидает проверки организатором.","ok");
       }
-    });
-  </script>
+    } catch(err) {
+      console.error(err);
+      notice("registerMessage","Проверь подключение к интернету.","err");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "ОТПРАВИТЬ ЗАЯВКУ";
+    }
+  });
+
+  document.getElementById("passportForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const id = document.getElementById("passportId").value.trim().toUpperCase();
+    const btn = document.getElementById("passportButton");
+    const result = document.getElementById("passportResult");
+
+    result.innerHTML = "";
+    btn.disabled = true;
+    btn.textContent = "ПРОВЕРЯЕМ...";
+
+    try {
+      const {data,error} = await db.rpc("verify_ff_passport", {
+        p_passport_id: id
+      });
+
+      if (error) {
+        console.error(error);
+        notice("passportMessage","Проверка пока не настроена. Организатору нужно применить SQL-настройку паспорта.","err");
+      } else if (!data || data.length === 0) {
+        notice("passportMessage","Паспорт не найден. Проверь номер и попробуй снова.","err");
+      } else {
+        const p = data[0];
+        notice("passportMessage","Паспорт найден в базе FF CUP.","ok");
+
+        const card = document.createElement("div");
+        card.className = "passport";
+
+        const heading = document.createElement("div");
+        heading.textContent = "FF CUP PLAYER PASSPORT";
+
+        const number = document.createElement("strong");
+        number.textContent = p.passport_id;
+
+        const name = document.createElement("div");
+        name.textContent = "Игровой ник: " + p.nickname;
+
+        const status = document.createElement("div");
+        status.textContent = "Статус заявки: " + p.status;
+
+        card.append(heading,number,name,status);
+        result.appendChild(card);
+      }
+    } catch(err) {
+      console.error(err);
+      notice("passportMessage","Не удалось выполнить проверку. Попробуй позже.","err");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "ПРОВЕРИТЬ ПАСПОРТ";
+    }
+  });
+</script>
 </body>
 </html>
