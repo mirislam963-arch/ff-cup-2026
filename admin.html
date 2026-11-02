@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FF CUP 2026 — Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body {
+  margin: 0;
+  padding: 20px;
+  background: #071426;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+main { max-width: 1000px; margin: auto; }
+.card {
+  background: #10233d;
+  border: 1px solid #254362;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0;
+}
+input, button {
+  padding: 12px;
+  margin: 5px;
+  border-radius: 9px;
+  border: 1px solid #345;
+}
+input {
+  display: block;
+  width: 90%;
+  background: #08192d;
+  color: white;
+}
+button {
+  background: #39d7f2;
+  color: #062033;
+  font-weight: bold;
+  cursor: pointer;
+}
+table { width: 100%; border-collapse: collapse; }
+td, th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 1px solid #345;
+}
+.muted { color: #a9bdd1; }
+.hidden { display: none; }
+.notice {
+  padding: 12px;
+  background: #0b3046;
+  margin-top: 10px;
+  white-space: pre-wrap;
+}
+</style>
+</head>
+<body>
+<main>
+<h1>🏆 FF CUP 2026</h1>
+<p class="muted">Панель администратора</p>
+
+<section class="card" id="login">
+<h2>Вход администратора</h2>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Пароль">
+<button id="loginBtn">Войти</button>
+<div id="loginMsg" class="notice hidden"></div>
+</section>
+
+<section class="card hidden" id="dashboard">
+<button id="refresh">Обновить</button>
+<button id="logout">Выйти</button>
+<h2>Заявки игроков</h2>
+<div id="msg" class="notice hidden"></div>
+<div style="overflow:auto">
+<table>
+<thead>
+<tr>
+<th>Ник</th>
+<th>UID</th>
+<th>Статус</th>
+<th>Дата</th>
+<th>Действия</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+</section>
+</main>
+
+<script>
+const URL = "https://rciwumuqhwpncviyojnj.supabase.co";
+const KEY = "sb_publishable_t6mgrMh69tBD7dy021EnIA_SbWwJg6n";
+
+const db = supabase.createClient(URL, KEY);
+const $ = id => document.getElementById(id);
+
+function showMessage(id, text) {
+  $(id).textContent = text;
+  $(id).classList.remove("hidden");
+}
+
+function showDashboard(active) {
+  $("login").classList.toggle("hidden", active);
+  $("dashboard").classList.toggle("hidden", !active);
+}
+
+async function loadPlayers() {
+  const { data, error } = await db
+    .from("players")
+    .select("id,nickname,game_uid,status,created_at")
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    showMessage("msg", "Ошибка: " + error.message);
+    return;
+  }
+
+  $("rows").innerHTML = "";
+
+  (data || []).forEach(player => {
+    const tr = document.createElement("tr");
+
+    [
+      player.nickname,
+      player.game_uid,
+      player.status,
+      player.created_at
+        ? new Date(player.created_at).toLocaleString("ru-RU")
+        : "—"
+    ].forEach(value => {
+      const td = document.createElement("td");
+      td.textContent = value ?? "—";
+      tr.appendChild(td);
+    });
+
+    const actions = document.createElement("td");
+
+    ["approved", "rejected"].forEach(status => {
+      const button = document.createElement("button");
+      button.textContent =
+        status === "approved" ? "Одобрить" : "Отклонить";
+
+      button.onclick = async () => {
+        button.disabled = true;
+
+        const { error } = await db
+          .from("players")
+          .update({ status })
+          .eq("id", player.id);
+
+        button.disabled = false;
+
+        if (error) {
+          showMessage("msg", "Не удалось изменить статус: " + error.message);
+        } else {
+          showMessage("msg", "Статус заявки изменён.");
+          await loadPlayers();
+        }
+      };
+
+      actions.appendChild(button);
+    });
+
+    tr.appendChild(actions);
+    $("rows").appendChild(tr);
+  });
+
+  if (!data || data.length === 0) {
+    showMessage("msg", "Заявок пока нет.");
+  }
+}
+
+$("loginBtn").onclick = async () => {
+  const { error } = await db.auth.signInWithPassword({
+    email: $("email").value.trim(),
+    password: $("password").value
+  });
+
+  if (error) {
+    showMessage("loginMsg", "Ошибка входа: " + error.message);
+    return;
+  }
+
+  showDashboard(true);
+  await loadPlayers();
+};
+
+$("refresh").onclick = loadPlayers;
+
+$("logout").onclick = async () => {
+  await db.auth.signOut();
+  showDashboard(false);
+};
+
+db.auth.getSession().then(async ({ data }) => {
+  if (data.session) {
+    showDashboard(true);
+    await loadPlayers();
+  }
+});
+</script>
+</body>
+</html>
